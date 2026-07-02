@@ -6,11 +6,11 @@
   :root {
     --bg: #F8F8F8;
     --surface: #EFEFEF;
-    --brand: #FF01FF;
-    --brand-hover: #E600E6;
+    --brand: #FF01FF; /* vivid — graphics only (graph nodes, selection); not text */
+    --brand-hover: #A800A8;
     --brand-soft: #FFE5FF;
     --text: #111111;
-    --muted-text: #777777;
+    --muted-text: #656565;
   }
 }
 
@@ -68,12 +68,13 @@
   --card-foreground: #111111;
   --popover: #FFFFFF;
   --popover-foreground: #111111;
-  --primary: #FF01FF;
+  /* interactive magenta: WCAG AA on white (5.07:1). Vivid --brand stays for graphics. */
+  --primary: #C400C4;
   --primary-foreground: #FFFFFF;
   --secondary: #EFEFEF;
   --secondary-foreground: #111111;
   --muted: #EFEFEF;
-  --muted-foreground: #777777;
+  --muted-foreground: #656565;
   --accent: #FFE5FF;
   --accent-foreground: #111111;
   --destructive: oklch(0.577 0.245 27.325);
@@ -142,6 +143,18 @@
   }
   ::selection {
     background: var(--brand-soft);
+  }
+  /* Tailwind v4 preflight drops the default button cursor — restore it */
+  button:not(:disabled),
+  [role="button"],
+  [role="tab"],
+  [role="radio"],
+  summary,
+  a[href] {
+    cursor: pointer;
+  }
+  button:disabled {
+    cursor: not-allowed;
   }
 }
 
