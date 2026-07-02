@@ -1,90 +1,136 @@
-# Deconstructed
+# Deconstructed — design & build log
 
-*Understand how products evolve.*
+How the project was reasoned out and built, in the order the decisions were
+made.
 
-Deconstructed reconstructs a product's evolution from its public artifacts —
-issues, discussions, PRs, releases, docs, blog posts — as a knowledge graph.
-Instead of "here's the README," it answers *why* a feature exists: which
-problem prompted it, which design decision shaped it, which discussion or
-bug reshaped it later.
+## Goal
 
-## Why
+Reconstruct *why* a software product evolved the way it did, from its public
+GitHub artifacts, and present that reasoning as connected evidence rather than
+a generated paragraph.
 
-Understanding how a product got the way it is means reading a dozen
-disconnected sources by hand — docs, then GitHub, then the PR, then the
-discussion that argued over it, then the release notes. Nobody connects
-them. Deconstructed does, by treating them as one memory instead of many
-documents.
+## Core idea: decision chains, not RAG
 
-## How it works
+The differentiator is not retrieving documents — it is reconstructing the
+chain behind a change:
 
-1. Pull public artifacts for a product (GitHub issues, PRs, discussions,
-   releases, docs, blog) and normalize them into a shared schema.
-2. `remember()` them into Cognee Cloud.
-3. Ask a question — `recall()` traverses the graph across sources instead
-   of returning a single matching document.
-4. Two independent products (Vercel AI SDK, Cal.com) share the exact same
-   schema, so the same engine works on a dev-tooling SDK and a user-facing
-   SaaS product without per-product logic.
+```
+problem (issue) → concept (feature) → implementation (pull request) → shipped (release)
+```
 
-## Architecture
+That chain is a **typed path through a graph**. So the graph has to be typed:
+generic text chunks can't be walked as a decision chain. This makes a typed
+knowledge graph the foundation, and it makes the rendered chain — not an LLM
+answer — the primary output. Each node in the chain is a real artifact with
+its GitHub URL, so the chain is also its own provenance.
+
+## Why Cognee Cloud
+
+- `remember()` accepts a `graph_model` (JSON Schema) plus a custom prompt, so
+  cognify extracts a typed ontology in a single hosted call — no local
+  extraction pipeline.
+- Managed multi-dataset isolation lets each product be its own dataset under
+  one shared ontology, queried alone or together.
+- `GRAPH_COMPLETION` answers over the graph for the free-text "ask" surface.
+
+## Ontology
+
+One `Product`-rooted schema, shared across every product
+(`types/graph.ts`, `lib/graph-schema.ts`):
 
 ```
 Product
-├── Feature
-├── Issue
-├── Discussion
-├── PullRequest
-├── Release
-├── Contributor
-├── Documentation
-└── Blog
+Feature      concerns_feature / implements_feature / introduced_in / superseded_by
+Issue        raised_by, resolves_issues
+PullRequest  author, resolves_issues, implements_feature
+Release      includes_pull_requests, supersedes
+Discussion   started_by, discusses_issues
+Contributor
 ```
 
-Root node is `Product`, not `Repository` — the schema is shared across both
-datasets, not bespoke per product.
+## Data flow
 
-All Cognee Cloud calls (`remember`/`recall`/`improve`/`search`) happen
-server-side only, via Next.js Route Handlers — the API key never reaches the
-client. No static `graph.json`, no MDX, no hand-authored content; the graph
-is built live from real ingested data, queried at request time.
+```
+GitHub artifacts
+  → normalize to prose that states relationships (lib/normalize.ts)
+  → remember(graph_model, custom_prompt)         [Cognee Cloud cognify]
+  → getDatasetGraph()                            [typed nodes + typed edges]
+  → parse: drop housekeeping, merge duplicates, lay out (lib/recall-parse.ts)
+  → graph · timeline · chain · ask               [client renders]
+```
 
-## Attribution
+Cognee owns extraction and storage; the app owns traversal and rendering. All
+Cognee calls are server-side so the API key never reaches the client.
 
-Public artifacts are analyzed and connected, not republished. Data sources
-are credited explicitly in the app; full docs/blog content is never mirrored.
+## Steps followed
 
-## Stack
+1. **Client and ontology.** Server-only Cognee client (`lib/cognee.ts`),
+   typed node/edge vocabulary (`types/graph.ts`), one dataset entry per
+   product (`lib/products.ts`).
+2. **Ingest.** Pure GitHub-artifact-to-prose functions (`lib/normalize.ts`,
+   unit-tested without network) and a batched ingest script that passes the
+   `graph_model` so Cognee builds a typed graph
+   (`scripts/ingest.ts`, `lib/graph-schema.ts`).
+3. **Parse and chain.** `parseGraph` filters Cognee's housekeeping nodes,
+   dedups edges, and merges cross-batch duplicate entities; `buildChain`
+   walks the typed evolution spine from a selected node (`lib/recall-parse.ts`,
+   `lib/chain.ts`).
+4. **API + UI.** Two server routes (dataset graph, ask) and a one-page
+   workspace with three views over one dataset — force-directed graph,
+   time-sorted timeline, decision chain — plus a graph-grounded ask panel.
+5. **Verify on Cloud** (below).
+6. **Polish.** WCAG AA contrast, keyboard/accessibility names, markdown
+   rendering in answers, and a readable graph layout.
+7. **Third product and prompt tuning** (below).
 
-Next.js (App Router), TypeScript, Tailwind, shadcn/ui, Zustand, React Query,
-Framer Motion, Sigma.js + Graphology (graph UI), Octokit (GitHub ingest),
-Cognee Cloud (memory), Vitest.
+## Verifying the approach on Cloud
 
-## Status: done
+Before building the typed pipeline out, the assumption was tested against the
+live API:
 
-- [x] Repo scaffolded (Next.js, TS, Tailwind v4, App Router, `@/*` alias)
-- [x] Deps installed: sigma, graphology, graphology-layout-forceatlas2,
-      zustand, @tanstack/react-query, framer-motion, octokit, server-only
-- [x] Test tooling: vitest, jsdom, @testing-library/react
-- [x] shadcn/ui initialized, badge/button/sheet added
-- [x] Brand tokens applied (bg `#F8F8F8`, surface `#EFEFEF`, brand `#FF01FF`,
-      hover `#E600E6`, soft `#FFE5FF`, text `#111111`, muted `#777777`),
-      Open Sans
-- [x] `types/graph.ts`: shared `Product`-rooted schema
-- [x] `.env.example` (`COGNEE_API_KEY`, `COGNEE_SERVICE_URL`, `GITHUB_TOKEN`)
+- `POST /api/v1/llm/infer-schema` proposes a `graph_model` JSON Schema from
+  sample text — schema authoring is assisted, not hand-written from scratch.
+- `POST /api/v1/remember` with that `graph_model` + custom prompt makes
+  cognify return typed nodes and typed chain edges. A sample decision chain
+  (Release → PR → RFC → Issue → author) came back intact.
 
-## Status: not started
+Two gotchas surfaced and are handled:
 
-- [ ] `lib/cognee.ts` — server-only Cognee Cloud client
-- [ ] Validate live `remember()`/`recall()`/`improve()` behavior against
-      Cognee Cloud before building the ingest pipeline on top of assumptions
-- [ ] `scripts/ingest.ts` — Octokit pull for both repos, normalized,
-      `remember()`'d in batches (not per-item — call count matters)
-- [ ] Next.js API routes proxying `recall`/`search`
-- [ ] Product-first UI: selector → feature view (Timeline / Knowledge Graph /
-      Feature Evolution / Related Features / Questions) — repository never
-      surfaces
-- [ ] Sigma.js `GraphCanvas` wired to live `recall()`/`search()` results
-- [ ] Hero queries per product + one cross-product comparison query
-- [ ] README with data-source attribution
-- [ ] Deploy to Vercel — env vars server-only, never `NEXT_PUBLIC_`
+- **`format: "date"` crashes cognify** ("Object of type date is not JSON
+  serializable"). Date fields are kept as plain strings in the schema.
+- **No cross-batch entity resolution.** Ingesting in batches produces
+  duplicate `Product` (and other) nodes; `parseGraph` merges them by
+  `(type, label)` and remaps edges.
+
+SDK-only features (Python DataPoints, custom pipelines, global context index)
+are out of scope — the whole pipeline runs on the Cloud HTTP API.
+
+## Answer design
+
+`GRAPH_COMPLETION` returns a synthesized string with no node-level citations.
+Rather than approximate which nodes an answer used, the product makes the
+**decision chain itself the grounded answer** — a path of real artifacts, each
+linking to GitHub — and treats the generated prose as a caption. This
+sidesteps the missing attribution entirely.
+
+## Third product and prompt tuning
+
+Adding [Plane](https://github.com/makeplane/plane) was one dataset entry plus
+one ingest run — the UI is data-driven, so no structural change.
+
+The first ingests produced very few `Feature` nodes, leaving the chain's
+"concept" stage thin. Tuning the extraction prompt to infer a feature per
+artifact and reuse it across related ones raised features from ~2 to 140–400
+per product, and all three products were re-ingested onto the tuned prompt for
+consistency (older datasets kept as rollback).
+
+## Known limits
+
+- **Supersession is sparse** (~1 edge per product). GitHub prose rarely states
+  that one thing replaces another, so it can't be extracted reliably — and
+  edges are never fabricated to fill the gap.
+- **Graph scale.** The largest product is ~1k nodes; Sigma/WebGL handles it,
+  but the per-frame hover-dimming is `O(degree)` and would want optimizing
+  past a few thousand nodes.
+- **Freshness.** Ingest is a batch snapshot. Incremental re-sync via
+  `PATCH /update` is a natural next step, not yet built.
