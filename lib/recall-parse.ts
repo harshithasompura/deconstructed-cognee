@@ -157,9 +157,18 @@ export function layoutGraph(data: GraphData): GraphData {
     graph.addEdge(edge.from, edge.to)
   }
 
+  // linLog + high scalingRatio + low gravity spreads the hub-and-spoke shape
+  // (one Product connected to everything) instead of clumping it in a corner.
   forceAtlas2.assign(graph, {
-    iterations: 150,
-    settings: forceAtlas2.inferSettings(graph),
+    iterations: 300,
+    settings: {
+      ...forceAtlas2.inferSettings(graph),
+      linLogMode: true,
+      outboundAttractionDistribution: true,
+      scalingRatio: 12,
+      gravity: 0.4,
+      barnesHutOptimize: graph.order > 200,
+    },
   })
 
   let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity
