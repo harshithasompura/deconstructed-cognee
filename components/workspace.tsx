@@ -199,6 +199,7 @@ export function Workspace() {
             <button
               onClick={() => setLeftOpen((v) => !v)}
               aria-expanded={leftOpen}
+              aria-label="Toggle product rail"
               title="Toggle product rail"
               className={`annotation transition-colors focus-visible:outline-2 focus-visible:outline-primary ${
                 leftOpen ? "text-foreground" : "text-muted-foreground hover:text-foreground"
@@ -242,6 +243,7 @@ export function Workspace() {
             <button
               onClick={() => setRightOpen((v) => !v)}
               aria-expanded={rightOpen}
+              aria-label="Toggle ask panel"
               title="Toggle ask panel"
               className={`annotation transition-colors focus-visible:outline-2 focus-visible:outline-primary ${
                 rightOpen ? "text-foreground" : "text-muted-foreground hover:text-foreground"

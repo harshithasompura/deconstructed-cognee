@@ -102,5 +102,14 @@ export default function GraphCanvas({
     sigmaRef.current?.refresh({ skipIndexation: true });
   }, [selectedId]);
 
-  return <div ref={containerRef} className="absolute inset-0" />;
+  // Canvas nodes aren't keyboard-reachable; the timeline and chain tabs are
+  // the accessible, button-per-node equivalents over the same data.
+  return (
+    <div
+      ref={containerRef}
+      role="img"
+      aria-label="Knowledge graph of connected artifacts. Use the timeline or chain tabs for a keyboard-navigable view of the same data."
+      className="absolute inset-0"
+    />
+  );
 }
