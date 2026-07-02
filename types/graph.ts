@@ -6,19 +6,23 @@ export type NodeType =
   | 'PullRequest'
   | 'Release'
   | 'Contributor'
-  | 'Documentation'
-  | 'Blog'
 
+// Edge labels = graph_model relationship field names (lib/graph-schema.ts).
+// 'related_to' is the fallback for labels outside the schema vocabulary.
 export type RelationshipType =
-  | 'HAS_FEATURE'
-  | 'RAISED_BY'
-  | 'DISCUSSED_IN'
-  | 'IMPLEMENTED_BY'
-  | 'SHIPPED_IN'
-  | 'AUTHORED_BY'
-  | 'DOCUMENTED_IN'
-  | 'REFERENCED_IN'
-  | 'SUPERSEDED_BY'
+  | 'part_of'
+  | 'raised_by'
+  | 'concerns_feature'
+  | 'author'
+  | 'resolves_issues'
+  | 'implements_feature'
+  | 'includes_pull_requests'
+  | 'supersedes'
+  | 'superseded_by'
+  | 'introduced_in'
+  | 'discusses_issues'
+  | 'started_by'
+  | 'related_to'
 
 export interface GraphNode {
   id: string
