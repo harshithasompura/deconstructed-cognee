@@ -11,8 +11,8 @@ export const PRODUCTS: Product[] = [
     id: 'vercel-ai-sdk',
     name: 'Vercel AI SDK',
     repo: 'vercel/ai',
-    // _v2 = typed graph_model ingest; v1 dataset kept as rollback
-    datasetName: 'deconstructed_vercel_ai_sdk_v2',
+    // _v3 = tuned-prompt ingest (rich feature layer); _v2 kept as rollback
+    datasetName: 'deconstructed_vercel_ai_sdk_v3',
     tagline: 'TypeScript toolkit for building AI apps',
     questions: [
       'Why does streamText exist, and what problem did it replace?',
@@ -24,7 +24,7 @@ export const PRODUCTS: Product[] = [
     id: 'cal-com',
     name: 'Cal.com',
     repo: 'calcom/cal.com',
-    datasetName: 'deconstructed_cal_com',
+    datasetName: 'deconstructed_cal_com_v3',
     tagline: 'Open scheduling infrastructure',
     questions: [
       'Why were routing forms introduced?',
