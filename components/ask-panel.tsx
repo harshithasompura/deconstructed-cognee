@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Markdown } from "@/components/markdown";
 import { CROSS_PRODUCT_QUESTION, type Product } from "@/lib/products";
 
 type Scope = "product" | "all";
@@ -132,9 +133,9 @@ export function AskPanel({ product }: { product: Product }) {
       {state.status === "answered" && (
         <div className="flex min-h-0 flex-col border-l-2 border-primary bg-card px-3 py-2.5">
           <h3 className="annotation shrink-0 text-muted-foreground">Answer</h3>
-          <p className="mt-1.5 max-h-[45vh] overflow-y-auto whitespace-pre-wrap text-sm leading-relaxed">
-            {state.answer}
-          </p>
+          <div className="mt-1.5 max-h-[45vh] overflow-y-auto">
+            <Markdown text={state.answer} />
+          </div>
         </div>
       )}
       {state.status === "error" && (
