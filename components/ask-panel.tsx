@@ -94,7 +94,7 @@ export function AskPanel({ product }: { product: Product }) {
             {(
               [
                 ["product", product.name],
-                ["all", "Both products"],
+                ["all", "All products"],
               ] as [Scope, string][]
             ).map(([value, label]) => (
               <button
@@ -174,7 +174,7 @@ export function AskPanel({ product }: { product: Product }) {
                   {chip.text}
                   {chip.scope === "all" && (
                     <span className="annotation mt-1 block text-primary">
-                      across both products
+                      across all products
                     </span>
                   )}
                 </button>

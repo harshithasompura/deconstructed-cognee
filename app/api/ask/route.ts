@@ -10,7 +10,7 @@ export async function POST(request: Request) {
     return Response.json({ error: 'question is required' }, { status: 400 })
   }
 
-  // 'all' = cross-product question spanning both datasets
+  // 'all' = cross-product question spanning every product dataset
   const datasets =
     productId === 'all'
       ? PRODUCTS.map((p) => p.datasetName)

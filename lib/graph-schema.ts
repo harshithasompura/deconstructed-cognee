@@ -144,9 +144,14 @@ export const GRAPH_MODEL = {
 export const CUSTOM_PROMPT = `You are extracting a product-evolution knowledge graph from GitHub artifact descriptions.
 Extract every issue, pull request, release, discussion, contributor, product and feature mentioned.
 Use exact identifiers as names: "Issue #15481", "PR #610", release tags like "v5.0", contributor usernames verbatim.
-Link artifacts only by relationships stated in the text: who raised or authored what, which issues a pull request resolves (from "fixes #N" / "closes #N" or explicit statements), which pull requests a release includes, which feature an artifact concerns, and what supersedes or replaces what.
+
+FEATURES: for every issue, pull request and discussion, infer the product capability it concerns and create a Feature node for it — a short noun phrase like "kanban board", "time tracking", "OAuth login", "streaming responses". Reuse the same Feature node across artifacts about the same capability, and connect them with concerns_feature / implements_feature. A thin feature layer is a failure; most artifacts concern some feature.
+
+SUPERSESSION: when the text says an artifact deprecates, replaces, removes, migrates away from, or is a breaking change to earlier behaviour, a feature, or a release, extract the supersedes / superseded_by relationship explicitly.
+
+Link artifacts only by relationships stated or clearly implied: who raised or authored what, which issues a pull request resolves (from "fixes #N" / "closes #N"), which pull requests a release includes.
 Copy dates (YYYY-MM-DD) and URLs verbatim onto the artifact that owns them.
-Do not invent entities or relationships that are not stated.`
+Do not invent issues, PRs, releases or contributors that are not present; features may be inferred as above.`
 
 /** Node types the UI treats as domain entities (everything else in the
  *  dataset graph — DocumentChunk, TextSummary, … — is Cognee housekeeping). */
