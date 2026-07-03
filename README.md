@@ -127,3 +127,5 @@ Built on public GitHub artifacts from
 [calcom/cal.diy](https://github.com/calcom/cal.diy) and
 [makeplane/plane](https://github.com/makeplane/plane), analyzed and
 connected, never republished. Powered by [Cognee Cloud](https://www.cognee.ai).
+
+Built with AI-assisted development ([Claude Code, Opus 4.8](https://claude.com/claude-code)); all architecture, ontology design, and final code were authored and reviewed by the author.
