@@ -1,5 +1,14 @@
 # Deconstructed
 
+![Next.js](https://img.shields.io/badge/Next.js-16-000000?logo=nextdotjs&logoColor=white)
+![React](https://img.shields.io/badge/React-19-087EA4?logo=react&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4-06B6D4?logo=tailwindcss&logoColor=white)
+![Sigma.js](https://img.shields.io/badge/Sigma.js-3-FF4081)
+![graphology](https://img.shields.io/badge/graphology-0.26-1A73E8)
+![Cognee Cloud](https://img.shields.io/badge/Cognee_Cloud-memory-FF01FF)
+![Vitest](https://img.shields.io/badge/Vitest-3-6E9F18?logo=vitest&logoColor=white)
+
 *Reconstruct how a product evolved, from its public artifacts.*
 
 Deconstructed turns a product's GitHub history (issues, discussions, pull
