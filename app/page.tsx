@@ -16,7 +16,7 @@ export default function Home() {
       <header className="flex h-12 shrink-0 items-center justify-between border-b border-border bg-background px-5">
         <Wordmark />
         <p className="annotation hidden text-muted-foreground sm:block">
-          Product evolution, reconstructed from public artifacts
+          Understand product evolution, reconstructed from GitHub artifacts
         </p>
       </header>
 
@@ -36,15 +36,16 @@ export default function Home() {
               </a>
             </span>
           ))}{" "}
-          — analyzed and connected, never republished.
         </p>
         <p className="annotation text-muted-foreground">
-          Memory by{" "}
+          Powered by{" "}
           <a
             href="https://www.cognee.ai"
-            className="text-foreground underline decoration-border underline-offset-2 hover:decoration-primary"
+            aria-label="Cognee"
+            className="inline-flex items-center align-middle opacity-80 hover:opacity-100"
           >
-            Cognee Cloud
+            {/* eslint-disable-next-line @next/next/no-img-element -- static footer mark, no next/image needed */}
+            <img src="/cognee-logo-black.svg" alt="Cognee" className="h-6 w-auto dark:invert" />
           </a>
         </p>
       </footer>

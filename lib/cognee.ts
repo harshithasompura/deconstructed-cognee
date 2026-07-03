@@ -45,7 +45,7 @@ async function cogneeFetch(path: string, init: RequestInit): Promise<unknown> {
 }
 
 /**
- * Ingest + cognify in one call (Cognee V2 memory API).
+ * Ingest + extract in one call (Cognee V2 memory API `remember()`).
  * `graphModel` (JSON Schema) + `customPrompt` steer extraction into typed
  * domain nodes/edges instead of generic chunk entities — verified live.
  */

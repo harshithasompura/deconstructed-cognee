@@ -20,14 +20,14 @@ export function ChainView({
       <div className="absolute inset-0 grid place-items-center">
         <p className="annotation max-w-xs text-center text-muted-foreground">
           Select a node in the graph or timeline to reconstruct its decision
-          chain — the connected evidence, from problem to shipped.
+          chain: the connected evidence, from problem to shipped.
         </p>
       </div>
     );
   }
 
   return (
-    <div className="absolute inset-0 overflow-y-auto bg-background/60">
+    <div className="absolute inset-0 overflow-y-auto bg-card">
       <ol className="mx-auto flex max-w-2xl flex-col gap-6 px-6 py-8 lg:mx-0 lg:ml-10">
         {stages.map((stage, si) => (
           <li key={stage.rank} className="relative flex flex-col">

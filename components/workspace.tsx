@@ -1,13 +1,14 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { AskPanel } from "@/components/ask-panel";
 import { ChainView } from "@/components/chain-view";
 import { Timeline } from "@/components/timeline";
+import { filterGraph } from "@/lib/graph-filter";
 import { NODE_STYLE } from "@/lib/node-style";
 import { getProduct, PRODUCTS } from "@/lib/products";
-import type { GraphData, GraphNode } from "@/types/graph";
+import type { GraphData, GraphNode, NodeType } from "@/types/graph";
 
 const GraphCanvas = dynamic(() => import("@/components/graph-canvas"), {
   ssr: false,
@@ -34,9 +35,25 @@ export function Workspace() {
   const [leftOpen, setLeftOpen] = useState(true);
   const [rightOpen, setRightOpen] = useState(true);
   const [reloadKey, setReloadKey] = useState(0);
+  const [activeTypes, setActiveTypes] = useState<Set<NodeType>>(new Set());
 
   const product = getProduct(productId) ?? PRODUCTS[0];
   const data = graph.status === "ready" ? graph.data : null;
+  // Graph + timeline render this narrowed copy; chain stays on the full graph
+  // so a selected node can still walk edges to filtered-out neighbors.
+  const filtered = useMemo(
+    () => (data ? filterGraph(data, { query: "", types: activeTypes }) : null),
+    [data, activeTypes],
+  );
+  const filtering = activeTypes.size > 0;
+
+  const toggleType = (type: NodeType) =>
+    setActiveTypes((prev) => {
+      const next = new Set(prev);
+      if (next.has(type)) next.delete(type);
+      else next.add(type);
+      return next;
+    });
 
   useEffect(() => {
     const url = new URL(window.location.href);
@@ -46,6 +63,7 @@ export function Workspace() {
     let cancelled = false;
     setGraph({ status: "loading" });
     setSelected(null);
+    setActiveTypes(new Set());
     fetch(`/api/graph?product=${productId}`)
       .then(async (res) => {
         const body = await res.json();
@@ -119,26 +137,44 @@ export function Workspace() {
         </section>
 
         <section aria-label="Node types" className="hidden lg:block">
-          <h2 className="annotation mb-3 text-muted-foreground">Node types</h2>
+          <div className="mb-3 flex items-baseline justify-between">
+            <h2 className="annotation text-muted-foreground">Node types</h2>
+            {activeTypes.size > 0 && (
+              <button
+                onClick={() => setActiveTypes(new Set())}
+                className="annotation text-primary hover:underline focus-visible:outline-2 focus-visible:outline-primary"
+              >
+                clear
+              </button>
+            )}
+          </div>
           <ul className="flex flex-col gap-1.5">
             {Object.entries(NODE_STYLE).map(([type, style]) => {
               const count = typeCounts.get(type) ?? 0;
+              const on = activeTypes.has(type as NodeType);
+              const disabled = data !== null && count === 0;
               return (
-                <li
-                  key={type}
-                  className={`annotation flex items-center gap-2 ${
-                    data && count === 0 ? "opacity-35" : ""
-                  }`}
-                >
-                  <span
-                    aria-hidden
-                    className="size-2 shrink-0 rounded-full"
-                    style={{ background: style.color }}
-                  />
-                  <span className="flex-1 text-foreground">{style.label}</span>
-                  <span className="text-muted-foreground tabular-nums">
-                    {data ? count : "—"}
-                  </span>
+                <li key={type}>
+                  <button
+                    onClick={() => toggleType(type as NodeType)}
+                    disabled={disabled}
+                    aria-pressed={on}
+                    className={`annotation flex w-full items-center gap-2 border-l-2 py-0.5 pl-2 text-left transition-colors focus-visible:outline-2 focus-visible:outline-primary disabled:cursor-not-allowed ${
+                      on
+                        ? "border-primary bg-card"
+                        : "border-transparent hover:border-border hover:bg-card/60"
+                    } ${disabled ? "opacity-35" : ""}`}
+                  >
+                    <span
+                      aria-hidden
+                      className="size-2 shrink-0 rounded-full"
+                      style={{ background: style.color }}
+                    />
+                    <span className="flex-1 text-foreground">{style.label}</span>
+                    <span className="text-muted-foreground tabular-nums">
+                      {data ? count : "·"}
+                    </span>
+                  </button>
                 </li>
               );
             })}
@@ -227,9 +263,11 @@ export function Workspace() {
           </div>
           <div className="flex items-center gap-3">
             <p className="annotation text-muted-foreground tabular-nums">
-              {data
-                ? `${data.nodes.length} nodes / ${data.edges.length} edges`
-                : "memory offline"}
+              {!data
+                ? "memory offline"
+                : filtering
+                  ? `${filtered!.nodes.length}/${data.nodes.length} nodes`
+                  : `${data.nodes.length} nodes / ${data.edges.length} edges`}
             </p>
             <button
               onClick={() => setReloadKey((k) => k + 1)}
@@ -254,7 +292,7 @@ export function Workspace() {
           </div>
         </div>
 
-        <div className="dot-grid relative flex-1">
+        <div className="dot-grid relative flex-1 bg-card">
           {graph.status === "loading" && (
             <CanvasNote title="Loading memory">
               <p>Fetching knowledge graph for {product.name}…</p>
@@ -268,7 +306,7 @@ export function Workspace() {
                 <li>03&ensp;npm run ingest</li>
               </ol>
               <p className="mt-2 text-muted-foreground">
-                Then reload. The graph builds from live data only — nothing here
+                Then reload. The graph builds from live data only; nothing here
                 is mocked.
               </p>
             </CanvasNote>
@@ -283,16 +321,23 @@ export function Workspace() {
               <p className="text-muted-foreground">{graph.message}</p>
             </CanvasNote>
           )}
-          {data && view === "graph" && (
+          {filtered && view === "graph" && (
             <GraphCanvas
-              data={data}
+              data={filtered}
               selectedId={selected?.id ?? null}
               onSelect={selectNodeById}
             />
           )}
-          {data && view === "timeline" && (
+          {filtered && view === "graph" && filtered.nodes.length === 0 && (
+            <CanvasNote title="No matches">
+              <p className="text-muted-foreground">
+                Nothing matches the current filter.
+              </p>
+            </CanvasNote>
+          )}
+          {filtered && view === "timeline" && (
             <Timeline
-              data={data}
+              data={filtered}
               selectedId={selected?.id ?? null}
               onSelect={selectNodeById}
             />

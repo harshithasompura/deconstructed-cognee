@@ -74,7 +74,7 @@ function toRelationship(name: unknown): RelationshipType {
 /**
  * Cognee dataset-graph payload → domain nodes + deduped edges (positions
  * unset). Shape: { nodes:[{id,label,properties}], edges:[{source,target,
- * label}] }. Housekeeping nodes are dropped; cognify over-emits duplicate
+ * label}] }. Housekeeping nodes are dropped; remember() over-emits duplicate
  * edges (verified live), so edges dedup on (from,to,type). Degrades to
  * empty on anything unexpected — never throws on shape.
  */
@@ -82,7 +82,7 @@ export function parseGraph(raw: unknown): GraphData {
   const rawNodes = isDict(raw) && Array.isArray(raw.nodes) ? raw.nodes : []
   const rawEdges = isDict(raw) && Array.isArray(raw.edges) ? raw.edges : []
 
-  // Cloud cognify has no cross-batch entity resolution (verified live:
+  // Cloud remember() has no cross-batch entity resolution (verified live:
   // 314 duplicate Product nodes across 9 batches) — merge by (type, label),
   // absorbing metadata the canonical copy lacks, and remap edges.
   const nodes = new Map<string, GraphNode>() // canonical id → node

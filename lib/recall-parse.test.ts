@@ -17,7 +17,7 @@ describe('parseGraph', () => {
     ],
     edges: [
       { source: 'n2', target: 'n1', label: 'resolves_issues' },
-      // duplicate — cognify over-emits, must dedup
+      // duplicate — remember() over-emits, must dedup
       { source: 'n2', target: 'n1', label: 'resolves_issues' },
       { source: 'n1', target: 'n3', label: 'raised_by' },
       // unknown label falls back

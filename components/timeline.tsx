@@ -42,7 +42,7 @@ export function Timeline({
   let lastMonth = "";
 
   return (
-    <div className="absolute inset-0 overflow-y-auto bg-background/60">
+    <div className="absolute inset-0 overflow-y-auto bg-card">
       <ol className="mx-auto flex max-w-2xl flex-col px-6 py-6 lg:mx-0 lg:ml-10">
         {dated.map(({ node, date }) => {
           const month = date.slice(0, 7);
@@ -90,7 +90,7 @@ export function Timeline({
         )}
         {dated.length === 0 && (
           <li className="annotation text-muted-foreground">
-            No dated artifacts in memory yet — the graph view shows everything.
+            No dated artifacts in memory yet. The graph view shows everything.
           </li>
         )}
       </ol>

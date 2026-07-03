@@ -15,8 +15,8 @@ const plexMono = IBM_Plex_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Deconstructed",
-  description: "Understand how great products evolve.",
+  title: "Deconstructed: understand how products evolve",
+  description: "Understand how products evolve.",
 };
 
 export default function RootLayout({

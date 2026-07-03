@@ -1,12 +1,12 @@
 // The graph_model handed to Cognee Cloud remember(). This IS the ontology:
-// cognify extracts into exactly these node types and relationship fields —
+// remember() extracts into exactly these node types and relationship fields —
 // nothing regex-inferred client-side anymore.
 //
 // Shape mirrors what /api/v1/llm/infer-schema proposes (verified live
 // 2026-07-02): root object of entity arrays, $defs per type, relationships
 // as $ref fields. Field names become edge labels in the dataset graph.
 //
-// Gotcha (reproduced live): `format: "date"` crashes Cloud cognify
+// Gotcha (reproduced live): `format: "date"` crashes Cloud remember()
 // ("Object of type date is not JSON serializable") — dates stay plain strings.
 
 const contributorRef = { $ref: '#/$defs/Contributor' }

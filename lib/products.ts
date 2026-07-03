@@ -22,8 +22,8 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: 'cal-com',
-    name: 'Cal.com',
-    repo: 'calcom/cal.com',
+    name: 'Cal.diy',
+    repo: 'calcom/cal.diy',
     datasetName: 'deconstructed_cal_com_v3',
     tagline: 'Open scheduling infrastructure',
     questions: [

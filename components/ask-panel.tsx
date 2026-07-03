@@ -63,8 +63,8 @@ export function AskPanel({ product }: { product: Product }) {
       <div>
         <h2 className="annotation text-muted-foreground">Ask the memory</h2>
         <p className="mt-1 text-xs leading-relaxed text-foreground/70">
-          Answers traverse the knowledge graph — issues, discussions, pull
-          requests and releases connected — not a single document.
+          Answers traverse the knowledge graph: issues, discussions, pull
+          requests and releases connected, not a single document.
         </p>
       </div>
 
